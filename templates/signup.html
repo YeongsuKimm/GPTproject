@@ -1,0 +1,54 @@
+
+<body id="signup">
+
+    <div class="signup-container">
+      <a href="/" class="home-icon">
+        <i class="bi bi-house-door"></i>
+      </a>
+      <h3>Sign Up</h3>
+      <form id="signupForm">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input name="username" type="text" class="form-control" id="username" placeholder="Enter your username">
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input name="email" type="email" class="form-control" id="email" placeholder="Enter your email">
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input name="password" type="password" class="form-control" id="password" placeholder="Enter your password">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+      </form>
+      <p id="signupMessage"></p>
+    </div>
+    <script>
+      const signupForm = document.getElementById("signupForm")
+      signupForm.addEventListener("submit",  async function() {
+        event.preventDefault();
+        const response = await fetch("/signup/", {
+          method : "POST",
+          body : JSON.stringify({
+            username: document.getElementById("username").value,
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value,
+          }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        console.log(username)
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          localStorage.setItem("username", document.getElementById("username").value)
+          window.location.href = "/";
+        } else {
+          document.getElementById("signupMessage").textContent = data.message;
+        }
+      });
+    </script>
+  </body>
+  </html>

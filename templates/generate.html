@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div style="padding: 10px 100px">
+        <h1>Generate Your Story Book</h1>
+        <form id="generateForm">
+            <div style="margin-bottom: 15px;">
+                <label for="topic">Choose A Topic:</label><br>
+                <select id="topic" name="topic">
+                    <option value="Biology">Biology</option>
+                    <option value="Business">Business</option>
+                    <option value="Psychology">Psychology</option>
+                </select>
+            </div>
+    
+            <div style="margin-bottom: 15px;">
+                <label for="age">Choose Your Age Group:</label><br>
+                <select id="age" name="age">
+                    <option value="8-10">8-10</option>
+                    <option value="10-13">10-13</option>
+                    <option value="13-16">13-16</option>
+                </select>
+            </div>
+    
+            <div style="margin-bottom: 15px;">
+                <label for="length">Choose Your Desired Length:</label><br>
+                <select id="length" name="length">
+                    <option value="short">Short</option>
+                    <option value="medium">Medium</option>
+                    <option value="long">Long</option>
+                </select>
+            </div>
+    
+            <button type="submit">Generate Summary</button>
+        </form>
+        <p id="generateMessage"></p>
+        <p id="generateContent"></p>
+        <a>Download Text</a>
+
+        <div>
+            <button id="downloadTxt">Download as Text</button>
+            <button id="downloadPdf">Download as PDF</button>
+        </div>
+
+        <div>
+            <ul id = 'history'></ul>
+        </div>
+    </div>    
+    <script>
+        // window.onload = function () {
+        //     const history = JSON.parse('{{ stories|safe|escapejs }}');
+        //     console.log(history);
+        // }
+        
+        const generateForm = document.getElementById("generateForm");
+        generateForm.addEventListener("submit", async function() {
+            event.preventDefault();
+            const response = await fetch("/generate/",{
+                method: "POST",
+                body: JSON.stringify({
+                    topic : document.getElementById("topic").value,
+                    age : document.getElementById("age").value,
+                    length : document.getElementById("length").value
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            });
+            const data = await response.json();
+            console.log(data.data.content)
+            if (data.success) {
+                document.getElementById("generateContent").textContent = data.data.content;
+            } else {
+                document.getElementById("generateMessage").textContent = data.data.message;
+            }
+        });
+
+
+        document.getElementById("downloadTxt").addEventListener("click", async ()=>{
+            const story = resultBox.textContent;
+            if(!story){
+                alert('no story to download')
+                return;
+            }
+            const bloc = Blob([story], { type: 'text/plain' } );
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'storybook.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        })
+
+        document.getElementById("downloadPdf").addEventListener("click", async ()=>{
+            const story = resultBox.textContent;
+            if(!story){
+                alert('no story to download')
+                return;
+            }
+            const {jsPDF} = window.jspdf
+            const doc = new jsPDF();
+            const lines  = doc.splitTextToSize(story, 180);
+            doc.text(lines,10,10); //place the story text 10 mm from the left and 10 mm from the top
+            if (imagePreview.src){
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = imagePreview.src;
+                img.onload = () =>{
+                    doc.addPage();
+                    doc.addImage(img, "JPEG", 10,10,180,120)
+                    doc.save("storybook.pdf")
+                }
+            } else {
+                doc.save("storybook.pdf")
+            }
+        })
+    </script>
+</body>
+</html>

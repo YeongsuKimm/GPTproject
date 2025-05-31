@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .story-header {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .story-content {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 1.5rem;
+        }
+
+        .story-date {
+            font-size: 0.9rem;
+            color: #888;
+            font-style: italic;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="topic" class="story-header">
+        </div>
+        <div id="content" class="story-content">
+        </div>
+        <div id="date" class="story-date">
+        </div>
+    </div>
+
+    <div class="container" id="comments_container">
+        <h1>Comments</h1>
+        <ul id="comments"></ul>
+        <h3>Add a Comment:</h3>
+        <form id="comment_form">
+            <textarea id="comment_input" rows="3" cols="50" placeholder="Write your comment..."></textarea>
+            <br>
+            <button type="submit" id="submit_comment">Submit Comment</button>
+        </form>
+
+    </div>
+    <script>
+        function getCSRFToken() {
+            const token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            return token;
+        }
+        window.onload = function () {
+            const topic = document.getElementById("topic");
+            const content = document.getElementById("content");
+            const date = document.getElementById("date");
+            const commentForm = document.getElementById("comment_form");
+
+            async function display() {
+                const pathname = window.location.pathname;
+                const id = pathname.match(/\/story\/(\d+)\//)[1];
+                console.log(id);
+                const response = await fetch(`/get-story/${id}`);
+                const story = await response.json();
+                console.log(story[0])
+                topic.innerText = story[0].topic;
+                content.innerText = story[0].content;
+                date.innerText = story[0].date;
+            }
+            commentForm.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const commentText = document.getElementById("comment_input").value;
+
+                if (commentText.trim() === "") {
+                    alert("Comment cannot be empty.");
+                    return;
+                }
+
+                const pathname = window.location.pathname;
+                const id = pathname.match(/\/story\/(\d+)\//)[1];
+                
+                const response = await fetch(`/get-story/${id}/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCSRFToken(),
+                    },
+                    body: JSON.stringify({ content: commentText })
+                });
+
+                if (response.ok) {
+                    alert("Comment added");
+                    document.getElementById("comment_input").value = ""; 
+                } else {
+                    alert("Error posting comment.");
+                }
+            });
+            display()
+        }
+    </script>
+</body>
+</html>

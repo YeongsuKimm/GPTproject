@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <section class="px-6 pt-6">
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <img src="https://via.placeholder.com/40" alt="Profile" class="w-10 h-10 rounded-full"/>
+      <h2 id="name" class="text-2xl font-bold mb-2">GUEST NAME</h2>
+      <p id="desc" class="text-gray-600">This is your story dashboard!</p>
+      <br>
+      <div>
+        <h1 class="text-2xl font-bold mb-2">Story History</h1>
+        <ul id="history"></ul>
+      </div>
+    </div>
+  </section>
+  <script>
+    window.onload = function () {
+      const user = localStorage.getItem("username")
+      
+      async function getStories() {
+        console.log("HELlO")
+        const response = await fetch('/history/');
+        const stories = await response.json();
+        console.log(stories)
+        const story_container = document.getElementById("history")
+        stories.forEach(story => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <div style="
+              border: 1px solid #ccc;
+              padding: 1rem;
+              margin-bottom: 1rem;
+              border-radius: 8px;
+              background-color: #f9f9f9;
+            ">
+              <h3 style="font-weight: bold;">${story.topic}</h3>
+              <p>${story.content}</p>
+              <p><em>Created at: ${story.created_at}</em></p>
+              <a href="/story/${story.id}">View Details</a>
+            </div>
+          `;
+          story_container.appendChild(li)
+        });
+      }
+      if (user !== ""){
+        document.getElementById("name").innerText = user;
+      }
+      console.log(user)
+      getStories()      
+    }
+  </script>
+</body>
+</html>
