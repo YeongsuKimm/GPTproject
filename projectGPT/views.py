@@ -38,6 +38,10 @@ class IndexView(View):
     def get(self, request):
         return render(request, 'index.html')
 
+@method_decorator(csrf_exempt, name='dispatch')
+class DashboardView(View):
+    def get(self, request):
+        return render(request, 'dashboard.html')
 
 import json
 from django.views import View
@@ -264,6 +268,21 @@ class CommentModify(View):
             return JsonResponse({'error': 'Comment not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+# class ImageGetView(View):
+#     def get(self, request, id):
+
+
+
+
+
+
+
+
+
+
+
+
 
 # @api_view(["POST"])
 # @permission_classes([IsAuthenticated])

@@ -21,6 +21,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.IndexView.as_view(), name='to-index'),
+    path('dashboard/', views.DashboardView.as_view(), name="to-dashboard"),
     path('generate/', views.GenerateView.as_view(), name="generate_storybook"),
     path('login/', views.LoginView.as_view(), name="to-login"),
     path('signup/', views.SignupView.as_view(), name="to-signup"),
@@ -28,4 +29,5 @@ urlpatterns = [
     path('get-story/<int:id>/', views.StoryGetView.as_view(), name="to-get-story"),
     path('story/<int:id>/', views.StoryView.as_view(), name="to-story"),
     path('comment/<int:id>/', views.CommentModify.as_view(), name="comment-details"),
+    # path('assets/<str:id>/', views.ImageGetView.as_view(), name="get-image"),
 ]
