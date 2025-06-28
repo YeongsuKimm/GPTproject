@@ -26,5 +26,6 @@ urlpatterns = [
     path('signup/', views.SignupView.as_view(), name="to-signup"),
     path('history/',views.HistoryView.as_view(), name="to-history"),
     path('get-story/<int:id>/', views.StoryGetView.as_view(), name="to-get-story"),
-    path('story/<int:id>/', views.StoryView.as_view(), name="to-story")
+    path('story/<int:id>/', views.StoryView.as_view(), name="to-story"),
+    path('comment/<int:id>/', views.CommentModify.as_view(), name="comment-details"),
 ]

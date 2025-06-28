@@ -83,3 +83,8 @@ class Comment(models.Model):
     story = models.ForeignKey(Story, on_delete=models.CASCADE, null=True, related_name="comments")
     content = models.TextField(default="placeholder content")
     created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} at {self.created_at} on {self.story}"
+    
+    

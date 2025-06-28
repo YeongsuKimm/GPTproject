@@ -1,124 +1,245 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="utf-8">
+  <title>ProjectGPT - Storybook Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap + Icons + Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f1f4f9;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .card {
+      border: none;
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 2.5rem;
+      color: #34495e;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .form-control, .form-select {
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid #ced4da;
+    }
+
+    .btn-custom {
+      background: linear-gradient(to right, #667eea, #764ba2);
+      color: #fff;
+      font-weight: 600;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 30px;
+      transition: all 0.3s;
+    }
+
+    .btn-custom:hover {
+      background: linear-gradient(to right, #556cd6, #5b3b84);
+    }
+
+    .page {
+      background: white;
+      width: 500px;
+      height: 100%;
+      padding: 25px;
+      box-sizing: border-box;
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+      overflow-y: auto;
+    }
+
+    .page img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .page p {
+      font-size: 18px;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    #storybook {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      height: 600px;
+    }
+
+    .nav-buttons, .pdf-btn {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .pdf-btn button {
+      background-color: #f39c12;
+      border: none;
+      color: white;
+      font-weight: bold;
+      padding: 10px 24px;
+      border-radius: 30px;
+      transition: background-color 0.3s;
+    }
+
+    .pdf-btn button:hover {
+      background-color: #e67e22;
+    }
+
+    @media (max-width: 768px) {
+      #storybook, .page {
+        width: 100% !important;
+        height: auto !important;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div style="padding: 10px 100px">
-        <h1>Generate Your Story Book</h1>
-        <form id="generateForm">
-            <div style="margin-bottom: 15px;">
-                <label for="topic">Choose A Topic:</label><br>
-                <select id="topic" name="topic">
-                    <option value="Biology">Biology</option>
-                    <option value="Business">Business</option>
-                    <option value="Psychology">Psychology</option>
-                </select>
-            </div>
-    
-            <div style="margin-bottom: 15px;">
-                <label for="age">Choose Your Age Group:</label><br>
-                <select id="age" name="age">
-                    <option value="8-10">8-10</option>
-                    <option value="10-13">10-13</option>
-                    <option value="13-16">13-16</option>
-                </select>
-            </div>
-    
-            <div style="margin-bottom: 15px;">
-                <label for="length">Choose Your Desired Length:</label><br>
-                <select id="length" name="length">
-                    <option value="short">Short</option>
-                    <option value="medium">Medium</option>
-                    <option value="long">Long</option>
-                </select>
-            </div>
-    
-            <button type="submit">Generate Summary</button>
-        </form>
-        <p id="generateMessage"></p>
+
+{% include 'nav.html' %}
+
+<div class="container py-5">
+  <div class="card p-5 mt-5">
+    <h1 class="text-center mb-4">ProjectGPT - Storybook Generator</h1>
+
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Field</label>
+          <input type="text" name="field" class="form-control" required value="Environmental Science">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Topic</label>
+          <input type="text" name="topic" class="form-control" required value="The Water Cycle">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">School Grade</label>
+          <input type="text" name="grade" class="form-control" required value="3">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Age</label>
+          <input type="number" name="age" class="form-control" required value="9">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Gender</label>
+          <select name="gender" class="form-select" required>
+            <option value="any">Any</option>
+            <option value="boy">Boy</option>
+            <option value="girl" selected>Girl</option>
+          </select>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <button id="generate" type="submit" class="btn btn-custom">Generate Story</button>
+      </div>
+
+      <div id="loading-spinner" class="text-center mt-4" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Generating your story...</p>
+      </div>
+    </form>
+    <p id="generateMessage"></p>
         <p id="generateContent"></p>
-        <a>Download Text</a>
+  </div>
 
-        <div>
-            <button id="downloadTxt">Download as Text</button>
-            <button id="downloadPdf">Download as PDF</button>
-        </div>
+  
+</div>
 
-        <div>
-            <ul id = 'history'></ul>
-        </div>
-    </div>    
-    <script>
-        // window.onload = function () {
-        //     const history = JSON.parse('{{ stories|safe|escapejs }}');
-        //     console.log(history);
-        // }
-        
-        const generateForm = document.getElementById("generateForm");
-        generateForm.addEventListener("submit", async function() {
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const generateForm = document.querySelector("form");
+
+        generateForm.addEventListener("submit", async function(event) {
             event.preventDefault();
-            const response = await fetch("/generate/",{
-                method: "POST",
-                body: JSON.stringify({
-                    topic : document.getElementById("topic").value,
-                    age : document.getElementById("age").value,
-                    length : document.getElementById("length").value
-                }),
-                headers: {
-                    "Content-Type": "application/json"
-                },
-            });
-            const data = await response.json();
-            console.log(data.data.content)
-            if (data.success) {
-                document.getElementById("generateContent").textContent = data.data.content;
-            } else {
-                document.getElementById("generateMessage").textContent = data.data.message;
+            console.log("wasd"); 
+            document.getElementById("loading-spinner").style.display = "block";
+
+            const formData = new FormData(generateForm);
+            const data = {
+                field: formData.get("field"),
+                topic: formData.get("topic"),
+                grade: formData.get("grade"),
+                age: formData.get("age"),
+                gender: formData.get("gender"),
+            };
+            try {
+                const response = await fetch("/generate/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                console.log(result);
+
+                if (result.success && result.data && result.data.content) {
+                    document.getElementById("generateContent").textContent = result.data.content;
+                } else {
+                    document.getElementById("generateMessage").textContent = result.data?.message || "An error occurred.";
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("generateMessage").textContent = "An error occurred.";
+            } finally {
+                document.getElementById("loading-spinner").style.display = "none";
             }
         });
+    });
+    $(document).ready(function () {
+        $('form').submit(function () {
+        $('#loading-spinner').show();
+        });
 
+        const $book = $('#storybook');
+        if ($book.find('.page').length > 1) {
+        $book.turn({
+            width: 1000,
+            height: 600,
+            autoCenter: true
+        });
 
-        document.getElementById("downloadTxt").addEventListener("click", async ()=>{
-            const story = resultBox.textContent;
-            if(!story){
-                alert('no story to download')
-                return;
-            }
-            const bloc = Blob([story], { type: 'text/plain' } );
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'storybook.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-        })
+        $('#prev-page').click(() => $book.turn('previous'));
+        $('#next-page').click(() => $book.turn('next'));
+        }
+    });
 
-        document.getElementById("downloadPdf").addEventListener("click", async ()=>{
-            const story = resultBox.textContent;
-            if(!story){
-                alert('no story to download')
-                return;
-            }
-            const {jsPDF} = window.jspdf
-            const doc = new jsPDF();
-            const lines  = doc.splitTextToSize(story, 180);
-            doc.text(lines,10,10); //place the story text 10 mm from the left and 10 mm from the top
-            if (imagePreview.src){
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.src = imagePreview.src;
-                img.onload = () =>{
-                    doc.addPage();
-                    doc.addImage(img, "JPEG", 10,10,180,120)
-                    doc.save("storybook.pdf")
-                }
-            } else {
-                doc.save("storybook.pdf")
-            }
-        })
-    </script>
+    function downloadPDF() {
+        const element = document.getElementById('storybook');
+        const opt = {
+            margin: 0,
+            filename: 'storybook.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
+
 </body>
 </html>

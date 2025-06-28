@@ -155,21 +155,23 @@ class GenerateView(View):
         if not request.user.is_authenticated:
             return JsonResponse({"success": False, "error": "User not authenticated"}, status=401)
         data = json.loads(request.body)
+        field = data.get("field")
         topic = data.get("topic")
+        grade = data.get("grade")
         age = data.get("age")
-        length = data.get("length")
+        gender = data.get("gender")
         # client = OpenAI(api_key=open_ai_key)
         # response = client.chat.completions.create(
         #     model = "gpt-3.5-turbo",
         #     messages = [
-        #         {"role":"system","content":f"Provide responses of {length} length and as if you are talking to a {age} year old "},
+        #         {"role":"system","content":f"Provide responses of the field {field} and topic {topic} to an audience that is {age} years old, in {grade} grade, and {gender}"},
         #         {"role": "user", "content": topic}
         #     ],
         #     temperature = 0
         # )
 
         # result = response.choices[0].message.content.strip()
-        result = f"{topic} + {age} + {length}"
+        result = f"{field} + {topic} + {age} + {grade} + {gender}"
         context = {"content": result}
         request.user.add_story(content=context["content"], topic=topic)
         print(request.user.get_stories().count())
@@ -185,7 +187,7 @@ class StoryGetView(View):
             return JsonResponse({'error': 'Not authenticated'}, status=401)
         
         try:
-            story = request.user.get_stories().get(id=id)
+            story = Story.objects.get(id=id)
             story_data = [
                 {"topic": story.topic, "content": story.content, "date": story.created_at.strftime('%B %d, %Y, %I:%M %p'), "id": story.id, "comments": story.get_comment_ids()}
             ]
@@ -194,12 +196,13 @@ class StoryGetView(View):
             return JsonResponse({'error': str(e)}, status=500)
 
     def post(self, request, id):
+        print(request.user.username)
         if not request.user.is_authenticated:
             return JsonResponse({'error': 'Not authenticated'}, status=401)
         try:
             data = json.loads(request.body)
             content = data.get('content')
-            story = request.user.get_stories().get(id=id)
+            story = Story.objects.get(id=id)
             comment = Comment.objects.create(
                 user=request.user,
                 story=story,
@@ -214,7 +217,53 @@ class StoryView(View):
     def get(self,request,id):
         return render(request, 'story.html')
 
+class CommentModify(View):
+    def get(self, request, id):
+        try:
+            comment = Comment.objects.get(id=id)
+            commentData = [
+                {"content": comment.content, "created_at": comment.created_at, "user": comment.user.username}
+            ]
+            return JsonResponse(commentData, safe=False)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
+    def delete(self,request,id):
+        try:
+            comment = Comment.objects.get(id=id)
+            if request.user != comment.user:
+                return JsonResponse({'error': 'Not authorized'}, status=403)
+            comment.delete()
+            return JsonResponse("comment successfuly deleted", status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+    def put(self,request,id):
+        try:
+            comment = Comment.objects.get(id=id)
+            if request.user != comment.user:
+                return JsonResponse({'error': 'Not authorized'}, status=403)
+
+            data = json.loads(request.body)
+            new_content = data.get('content')
+            if not new_content:
+                return JsonResponse({'error': 'No content provided'}, status=400)
+
+            comment.content = new_content
+            comment.save()
+
+            return JsonResponse({
+                'message': 'Comment updated successfully',
+                'comment': {
+                    'id': comment.id,
+                    'content': comment.content,
+                    'created_at': comment.created_at,
+                }
+            }, status=200)
+        except Comment.DoesNotExist:
+            return JsonResponse({'error': 'Comment not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
 # @api_view(["POST"])
 # @permission_classes([IsAuthenticated])
